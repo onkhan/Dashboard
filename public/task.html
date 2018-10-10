@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/dashboard.css">
+
+    <title>Project Dashboard</title>
+  </head>
+  <body>
+
+
+    <main id="taskMain" class="container-fluid">
+      <div class="row">
+        <h2 class="col-9">Task #4: Write middleware</h2>
+        <p class="col task-estimate"><span class="estimate">80%</span></p>
+        <p class="col task-status" ><strong>Open</strong></p>
+        <p class="col task-type"><strong>Epic</strong></p>
+      </div>
+
+      <div class="row break-float">
+        <p class="col">Size: <strong>XL</strong></p>
+        <p class="col">Team: <strong>California Dream</strong></p>
+      </div>
+      <div class="row">
+        <p class="col">Started: <strong>2018-07-04</strong></p>
+        <p class="col">Last Updated: <strong>2018-07-20</strong></p>
+        <p class="col">Status: <strong>OPEN</strong></p>
+        <!-- TODO: "current_sprint" : true -->
+      </div>
+
+      <h3>Description</h3>
+      <p>Long description goes here</p>
+
+      <h3>Work</h3>
+      <table class="table table-striped table-sm">
+        <thead>
+          <tr>
+            <th>Start</th>
+            <th>End</th>
+            <th>Hours</th>
+            <th>Estimate</th>
+          </tr>
+        </thead>
+        <tbody v-for="w in work"
+        :key="w.id"
+        :id="'task-' + task.id + '-work-' + w.id">
+          <td>{{prettyDate(w.start)}}</td>
+          <td>{{prettyDate(w.stop)}}</td>
+          <td>{{w.hours}}</td>
+          <td>{{w.completion_estimate}}</td>
+        </tbody>
+      </table>
+
+        <h5>Total Hours: <strong>{{ sumHours() }}</strong></h5>
+
+        <!-- modal dialog showing task hours when clicked -->
+        <!-- Button trigger modal -->
+        <!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#workHoursModal">
+          Launch demo modal
+        </button> -->
+
+        <!-- Modal -->
+        <!-- <div class="modal fade" id="workHoursModal" tabindex="-1" role="dialog" aria-labelledby="workHoursModalTitle" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="workHoursModalTitle">Work on “#4 Task Name”</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+
+              </div>
+              <div class="modal-footer"> -->
+              <hr>
+                <h3>Add work</h3>
+
+                <form @submit.prevent="handleWorkForm">
+                  <div class="form-group row">
+                    <label for="start" class="col-sm-1 col-form-label">Start: </label>
+                    <div class="col-sm-6">
+                      <input type="datetime-local" id="start" v-model="workForm.start" class="form-control" required>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="stop" class="col-sm-1 col-form-label">End: </label>
+                    <div class="col-sm-6">
+                      <input type="datetime-local" id="stop" v-model="workForm.stop" class="form-control" required>
+                    </div>
+                  </div>
+                  <p>Logged work period is <strong>{{workSpan}} hours</strong></p>
+                  <div class="form-group row">
+                    <label for="completion_estimate" class="col-sm-2 col-form-label">Completion estimate: </label>
+
+                    <div class="col-sm-4 input-group">
+                      <input type="number" id="completion_estimate" v-model.lazy="workForm.completion_estimate" class="form-control" min="2" max="100" step="1" required>
+                      <div class="input-group-append">
+                        <span class="input-group-text">%</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-group row">
+                    <label for="team" class="col-sm-1 col-form-label">Team: </label>
+                    <div class="col-sm-6">
+                      <select id="team" v-model="workForm.team" class="form-control" required>
+                        <option v-for="t in teamList"
+                        :key="t.id"
+                        :value="t.id">{{ t.name }}</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button> -->
+                  <button type="submit" class="btn btn-primary">Save changes</button>
+                </form>
+              <!-- </div>
+            </div>
+          </div>
+        </div> -->
+
+    </main>
+
+    <!-- We need Bootstrap's modal JS, thus we also need jQuery -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script> -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
+    <!-- moment.js via CDN-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+
+    <!-- development version, includes helpful console warnings -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="js/tasks.app.js"></script>
+
+  </body>
+</html>

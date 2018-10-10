@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/dashboard.css">
+
+    <title>Project Dashboard</title>
+  </head>
+  <body>
+
+
+    <main id="dashboard" class="container-fluid">
+      <h1>{{ project.name }}</h1>
+      <p><em>{{ project.short_description }}</em></p>
+      <div class="row">
+        <div class="col placeholder">
+          Completion %
+        </div>
+
+        <section class="col">
+          <div class="row">
+            <div class="col">
+              <h2>Due date</h2>
+              <div class="ban">{{ pretty_date(project.target_date) }}</div>
+            </div>
+            <div class="col">
+              <h2>Remaining</h2>
+              <div class="ban">{{ days_left }} days</div>
+            </div>
+          </div>
+        </section>
+
+        <div class="col placeholder">
+          Status
+        </div>
+      </div> <!-- end row 1, high-level summary information -->
+
+      <div class="row">
+        <section class="col">
+          <h2>Spent</h2>
+          <div class="ban">{{ pretty_currency(project.spent) }}</div>
+
+          <h2>Budget</h2>
+          <div class="ban">{{ pretty_currency(project.budget) }}</div>
+
+          <h2>Projected Spend</h2>
+          <div class="ban">{{ pretty_currency(project.projected_spend) }}</div>
+        </section>
+        <div class="col placeholder" style="height:200px">
+          Burndown chart goes here.
+
+        </div>
+        <div class="col placeholder">
+          <div id="chartEffort"></div>
+        </div>
+      </div> <!-- end row 2, charts -->
+
+      <div class="row" id="taskFilter">
+        <div class="col">
+          <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            <label class="btn btn-outline-primary btn-sm active" @click="filter.showOpenClose='all'">
+              <input type="radio" name="showOpenClose" autocomplete="off" checked> All
+            </label>
+            <label class="btn btn-outline-primary btn-sm" @click="filter.showOpenClose='open'">
+              <input type="radio" name="showOpenClose" value="open" autocomplete="off"> Open
+            </label>
+            <label class="btn btn-outline-primary btn-sm" @click="filter.showOpenClose='closed'">
+              <input type="radio" name="showOpenClose" value="closed" autocomplete="off"> Closed
+            </label>
+          </div>
+          <!-- <input type="radio" name="showOpenClose" v-model="filter.showOpenClose" value="closed" autocomplete="off"> Closed -->
+
+        </div>
+
+        <!-- <div class="col">
+          <div class="btn-group-toggle" data-toggle="buttons">
+            <label class="btn btn-outline-primary btn-sm">
+              <input type="checkbox" name="showCurrent" v-model="filter.current_sprint" autocomplete="off"> Current Sprint
+            </label>
+          </div>
+        </div>
+        <div class="col">
+          <div class="btn-group-toggle" data-toggle="buttons">
+            <label class="btn btn-outline-primary btn-sm">
+              <input type="checkbox" name="showNotStarted" autocomplete="off"> Not Started
+            </label>
+          </div>
+        </div> -->
+      </div><!-- end row of filter buttons -->
+
+      <div class="row">
+        <table id="taskTable" class="table table-striped table-sm table-hover">
+          <thead>
+            <tr>
+              <th>Task</th>
+              <th>Type</th>
+              <th>Size</th>
+              <th>Assigned Team</th>
+              <th>Status</th>
+              <th>Started</th>
+              <th>Hrs</th>
+              <th>% Complete</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="task in filteredTasks"
+                :key="task.id"
+                :id="'task-' + task.id"
+                :class="task.current_sprint ? 'current-sprint' : '' "
+                @click="gotoTask(task.id)">
+              <td>{{ task.title }}</td>
+              <td>{{ task.type }}</td>
+              <td>{{ task.size }}</td>
+              <td>{{ task.team }}</td>
+              <td>{{ task.status }}</td>
+              <td>{{ task.start_date }}</td>
+              <td>{{ task.hours_worked }}</td>
+              <td :class="completeClass(task)">{{ task.perc_complete }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div> <!-- end row 3, tabular data -->
+    </main>
+
+    <!-- jQuery needed for Bootstrap dependency -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script> -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
+    <!-- moment.js via CDN-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+
+    <!-- development version, includes helpful console warnings -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="js/dashboard.app.js"></script>
+
+    <script src="js/tablesort.min.js"></script>
+    <script>
+      // Tablesort plugin from http://tristen.ca/tablesort/demo/
+      Tablesort.extend('tshirt', function(item) {
+        // Regular expression to test against.
+        return /^X?S|M|X?L|2XL$/.test(item);
+      }, function(a, b) {
+        // Custom sort functionality goes here.
+        // e.g var n = (a > b) ? -1 : 1;
+        var sizes = ['XS', 'S', 'M', 'L', 'XL', '2XL'];
+        return sizes.indexOf(b) - sizes.indexOf(a);
+      });
+
+      new Tablesort(document.getElementById('taskTable'));
+    </script>
+    <script src="https://code.highcharts.com/highcharts.src.js"></script>
+  </body>
+</html>
